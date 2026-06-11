@@ -126,13 +126,12 @@
   (function () {
     var v = document.getElementById('heroVideo');
     if (!v || reduced || matchMedia('(max-width: 768px)').matches) return;
+    v.preload = 'auto';
     v.src = './assets/hero-loop.mp4';
-    v.addEventListener('canplaythrough', function () {
-      var p = v.play();
-      if (p && p.then) p.then(function () { v.classList.add('on'); }).catch(function () {});
-      else v.classList.add('on');
-    }, { once: true });
-    v.load();
+    // Fade in only once frames are actually rendering; the photo stays otherwise.
+    v.addEventListener('playing', function () { v.classList.add('on'); }, { once: true });
+    var p = v.play();
+    if (p && p.catch) p.catch(function () { /* autoplay blocked — photo remains */ });
   })();
 
   /* ---- contact form ------------------------------------------------------------------ */
