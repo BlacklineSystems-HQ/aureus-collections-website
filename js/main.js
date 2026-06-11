@@ -129,7 +129,8 @@
     var hero = document.getElementById('hero');
     if (!v || reduced || matchMedia('(max-width: 768px)').matches) return;
     v.preload = 'auto';
-    v.src = './assets/hero-loop.mp4';
+    // ?v=2 busts caches that still hold the original silent encode of this file.
+    v.src = './assets/hero-loop.mp4?v=2';
     // Fade in only once frames are actually rendering; the photo stays otherwise.
     v.addEventListener('playing', function () {
       v.classList.add('on');
