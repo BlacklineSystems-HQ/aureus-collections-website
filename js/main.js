@@ -208,6 +208,16 @@
       });
     }
 
+    // Resume when the visitor returns to the tab (Chrome pauses hidden-tab video).
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState !== 'visible' || !hero) return;
+      var rect = hero.getBoundingClientRect();
+      if (rect.bottom > 0 && rect.top < innerHeight) {
+        var r = v.play();
+        if (r && r.catch) r.catch(function () {});
+      }
+    });
+
     // Pause and mute when the hero scrolls out of view; resume on return.
     if (hero && 'IntersectionObserver' in window) {
       new IntersectionObserver(function (entries) {
