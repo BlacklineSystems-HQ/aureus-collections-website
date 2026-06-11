@@ -135,18 +135,44 @@
       v.classList.add('on');
       if (btn) { btn.hidden = false; requestAnimationFrame(function () { btn.classList.add('show'); }); }
     }, { once: true });
-    var p = v.play();
-    if (p && p.catch) p.catch(function () { /* autoplay blocked — photo remains */ });
-
-    // Sound toggle — browsers require a click before audio is allowed.
     function setBtn() {
       if (!btn) return;
       btn.textContent = v.muted ? 'Sound On' : 'Sound Off';
       btn.setAttribute('aria-pressed', String(!v.muted));
     }
+
+    // Try sound-on autoplay first. Browsers only allow it for engaged/returning
+    // visitors; everyone else gets muted playback, then sound enables itself on
+    // the first click, tap, or keypress anywhere on the page.
+    v.muted = false;
+    v.volume = 1;
+    var p = v.play();
+    if (p && p.then) {
+      p.then(setBtn).catch(function () {
+        v.muted = true;
+        setBtn();
+        var retry = v.play();
+        if (retry && retry.catch) retry.catch(function () { /* photo remains */ });
+        var unmute = function (e) {
+          removeEventListener('pointerdown', unmute);
+          removeEventListener('keydown', unmute);
+          removeEventListener('touchend', unmute);
+          // If the first interaction IS the sound button, let its own handler decide.
+          if (e && e.target && e.target.closest && e.target.closest('#soundBtn')) return;
+          v.muted = false;
+          v.volume = 1;
+          setBtn();
+        };
+        addEventListener('pointerdown', unmute);
+        addEventListener('keydown', unmute);
+        addEventListener('touchend', unmute);
+      });
+    }
+
     if (btn) {
       setBtn();
-      btn.addEventListener('click', function () {
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
         v.muted = !v.muted;
         if (!v.muted) v.volume = 1;
         setBtn();
