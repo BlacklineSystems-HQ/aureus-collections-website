@@ -125,13 +125,43 @@
   /* ---- hero video (desktop only; photo is the fallback) ------------------------ */
   (function () {
     var v = document.getElementById('heroVideo');
+    var btn = document.getElementById('soundBtn');
+    var hero = document.getElementById('hero');
     if (!v || reduced || matchMedia('(max-width: 768px)').matches) return;
     v.preload = 'auto';
     v.src = './assets/hero-loop.mp4';
     // Fade in only once frames are actually rendering; the photo stays otherwise.
-    v.addEventListener('playing', function () { v.classList.add('on'); }, { once: true });
+    v.addEventListener('playing', function () {
+      v.classList.add('on');
+      if (btn) { btn.hidden = false; requestAnimationFrame(function () { btn.classList.add('show'); }); }
+    }, { once: true });
     var p = v.play();
     if (p && p.catch) p.catch(function () { /* autoplay blocked — photo remains */ });
+
+    // Sound toggle — browsers require a click before audio is allowed.
+    function setBtn() {
+      if (!btn) return;
+      btn.textContent = v.muted ? 'Sound On' : 'Sound Off';
+      btn.setAttribute('aria-pressed', String(!v.muted));
+    }
+    if (btn) {
+      setBtn();
+      btn.addEventListener('click', function () {
+        v.muted = !v.muted;
+        if (!v.muted) v.volume = 1;
+        setBtn();
+      });
+    }
+
+    // Pause and mute when the hero scrolls out of view; resume on return.
+    if (hero && 'IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) { v.play().catch(function () {}); }
+          else { v.pause(); v.muted = true; setBtn(); }
+        });
+      }, { threshold: 0.2 }).observe(hero);
+    }
   })();
 
   /* ---- contact form ------------------------------------------------------------------ */
