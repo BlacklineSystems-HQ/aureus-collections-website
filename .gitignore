@@ -1,6 +1,7 @@
 .DS_Store
 _previous/
 # source files — not part of the deployed site
+*.mov
 photo*.png
 photo*.JPG
 photo*.jpg
