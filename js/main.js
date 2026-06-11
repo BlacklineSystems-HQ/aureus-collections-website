@@ -122,6 +122,19 @@
     });
   })();
 
+  /* ---- hero video (desktop only; photo is the fallback) ------------------------ */
+  (function () {
+    var v = document.getElementById('heroVideo');
+    if (!v || reduced || matchMedia('(max-width: 768px)').matches) return;
+    v.src = './assets/hero-loop.mp4';
+    v.addEventListener('canplaythrough', function () {
+      var p = v.play();
+      if (p && p.then) p.then(function () { v.classList.add('on'); }).catch(function () {});
+      else v.classList.add('on');
+    }, { once: true });
+    v.load();
+  })();
+
   /* ---- contact form ------------------------------------------------------------------ */
   (function () {
     var form = document.getElementById('contactForm');
