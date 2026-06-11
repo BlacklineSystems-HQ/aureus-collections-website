@@ -164,7 +164,9 @@ h2.display{font-size:clamp(2.1rem,5vw,4rem);margin-bottom:28px}
 
 /* ---- services --------------------------------------------------------------- */
 .services{border-top:1px solid var(--line-soft);background:var(--bg-2)}
-.svc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin-top:24px}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft);margin-top:24px}
+@media (max-width:1024px){.svc-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:680px){.svc-grid{grid-template-columns:1fr}}
 .svc-card{background:var(--bg-2);padding:50px 42px;position:relative;overflow:hidden;transition:background .6s var(--ease)}
 .svc-card::before{content:"";position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,var(--steel),transparent);transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
 .svc-card:hover{background:var(--bg-3)}
