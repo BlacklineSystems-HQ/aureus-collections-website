@@ -1,0 +1,9 @@
+.DS_Store
+_previous/
+# source files — not part of the deployed site
+photo*.png
+photo*.JPG
+photo*.jpg
+"photo 5.png"
+1.png
+_serve.py
