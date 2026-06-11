@@ -153,19 +153,47 @@
         setBtn();
         var retry = v.play();
         if (retry && retry.catch) retry.catch(function () { /* photo remains */ });
-        var unmute = function (e) {
-          removeEventListener('pointerdown', unmute);
-          removeEventListener('keydown', unmute);
-          removeEventListener('touchend', unmute);
-          // If the first interaction IS the sound button, let its own handler decide.
-          if (e && e.target && e.target.closest && e.target.closest('#soundBtn')) return;
+
+        // Sound-in strategy: try on the first cursor movement (browsers allow it
+        // for visitors they trust); guaranteed on first click/tap/keypress.
+        var armed = true;
+        function disarm() {
+          armed = false;
+          removeEventListener('pointermove', onMove);
+          removeEventListener('pointerdown', onGesture);
+          removeEventListener('keydown', onGesture);
+          removeEventListener('touchend', onGesture);
+        }
+        function attempt(verify) {
           v.muted = false;
           v.volume = 1;
           setBtn();
-        };
-        addEventListener('pointerdown', unmute);
-        addEventListener('keydown', unmute);
-        addEventListener('touchend', unmute);
+          if (!verify) { disarm(); return; }
+          // No real gesture behind this attempt — confirm the browser allowed it.
+          setTimeout(function () {
+            if (v.muted || v.paused) {
+              v.muted = true;
+              setBtn();
+              var r = v.play();
+              if (r && r.catch) r.catch(function () {});
+            } else {
+              disarm();
+            }
+          }, 250);
+        }
+        function onMove() {
+          removeEventListener('pointermove', onMove);
+          if (armed) attempt(true);
+        }
+        function onGesture(e) {
+          if (!armed) return;
+          if (e && e.target && e.target.closest && e.target.closest('#soundBtn')) { disarm(); return; }
+          attempt(false);
+        }
+        addEventListener('pointermove', onMove);
+        addEventListener('pointerdown', onGesture);
+        addEventListener('keydown', onGesture);
+        addEventListener('touchend', onGesture);
       });
     }
 
