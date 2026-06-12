@@ -238,6 +238,7 @@ h2.display{font-size:clamp(2.1rem,5vw,4rem);margin-bottom:28px}
 .form-submit{grid-column:1/-1;margin-top:8px}
 .form-submit button{width:100%;justify-content:center;border:none}
 .form-note{grid-column:1/-1;font-size:.74rem;color:var(--muted);text-align:center;letter-spacing:.06em}
+.hp-field{position:absolute !important;left:-9999px !important;width:1px;height:1px;opacity:0;pointer-events:none}
 .form-note.error{color:#c9847e}
 .form-success{text-align:center;padding:60px 30px;border:1px solid var(--line);border-radius:4px;background:var(--bg-3);margin-top:46px}
 .form-success .check{width:64px;height:64px;border-radius:50%;border:1px solid var(--steel);display:flex;align-items:center;justify-content:center;margin:0 auto 24px}
