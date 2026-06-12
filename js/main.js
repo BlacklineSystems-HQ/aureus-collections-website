@@ -7,11 +7,8 @@
   'use strict';
 
   var CONFIG = {
-    // Get a free key at https://web3forms.com — deliveries go to the email
-    // the key is registered to (lukeapplebt@gmail.com).
-    WEB3FORMS_ACCESS_KEY: 'REPLACE_WITH_WEB3FORMS_ACCESS_KEY',
-    // Optional: Make.com webhook for the future SMS relay. Leave as-is to disable.
-    SMS_WEBHOOK_URL: 'REPLACE_WITH_MAKE_WEBHOOK_URL'
+    // Lead intake endpoint — writes straight into the Aureus CRM.
+    INQUIRY_ENDPOINT: 'https://aureus-crm.netlify.app/api/inquiry'
   };
 
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -245,42 +242,21 @@
       new FormData(form).forEach(function (v, k) { data[k] = v; });
       label.textContent = 'Sending…';
 
-      var keyed = CONFIG.WEB3FORMS_ACCESS_KEY && CONFIG.WEB3FORMS_ACCESS_KEY.indexOf('REPLACE') !== 0;
-      var jobs = [];
-
-      if (keyed) {
-        jobs.push(fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify(Object.assign({
-            access_key: CONFIG.WEB3FORMS_ACCESS_KEY,
-            subject: 'New Aureus inquiry — ' + (data.name || '') + ' (' + (data.project_type || '') + ')',
-            from_name: 'Aureus Collections Website'
-          }, data))
-        }).then(function (r) { return r.ok; }));
-      }
-      if (CONFIG.SMS_WEBHOOK_URL && CONFIG.SMS_WEBHOOK_URL.indexOf('REPLACE') !== 0) {
-        jobs.push(fetch(CONFIG.SMS_WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        }).then(function (r) { return r.ok; }).catch(function () { return false; }));
-      }
-
-      if (!jobs.length) {
-        // No delivery key configured yet — be honest, route to direct contact.
-        label.textContent = 'Send to Luke';
-        note.textContent = 'Form delivery isn’t live yet — call or text (209) 410-2304 instead.';
-        note.classList.add('error');
-        return;
-      }
-
-      Promise.all(jobs).then(function (results) {
-        if (results.some(Boolean)) {
-          form.hidden = true;
-          success.hidden = false;
-          success.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
-        } else { throw new Error('delivery failed'); }
+      fetch(CONFIG.INQUIRY_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          contact: data.reply_to,
+          shoot_type: data.project_type,
+          message: data.message,
+          company: data.company || ''
+        })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('send failed');
+        form.hidden = true;
+        success.hidden = false;
+        success.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
       }).catch(function () {
         label.textContent = 'Send to Luke';
         note.textContent = 'Something went sideways. Call or text (209) 410-2304 — it goes to the same place.';
